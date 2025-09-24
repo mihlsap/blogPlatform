@@ -4,14 +4,14 @@ import org.springframework.http.HttpStatus;
 
 public enum ResponseMessage {
 
-    AUTHOR_NOT_FOUND(HttpStatus.NOT_FOUND, "Author not found."),
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
-    AUTHOR_UPDATED(HttpStatus.OK, "Author updated."),
-    AUTHOR_REMOVED(HttpStatus.OK, "Author removed."),
-    AUTHOR_FOUND(HttpStatus.OK, "Author found."),
-    AUTHOR_ADDED(HttpStatus.CREATED, "Author added."),
-    AUTHORS_FOUND(HttpStatus.OK, "Authors found."),
-    AUTHORS_NOT_FOUND(HttpStatus.NOT_FOUND, "Authors not found.");
+    CATEGORY_FOUND(HttpStatus.OK, "Category found."),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "Category not found."),
+    CATEGORY_ADDED(HttpStatus.CREATED, "Category added."),
+    CATEGORY_UPDATED(HttpStatus.OK, "Category updated."),
+    CATEGORY_REMOVED(HttpStatus.OK, "Category removed."),
+    CATEGORIES_FOUND(HttpStatus.OK, "Categories found."),
+    CATEGORIES_NOT_FOUND(HttpStatus.NOT_FOUND, "Categories not found.");
 
     public final String message;
     public final HttpStatus status;
