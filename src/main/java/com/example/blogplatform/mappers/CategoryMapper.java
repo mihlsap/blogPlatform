@@ -2,6 +2,7 @@ package com.example.blogplatform.mappers;
 
 import com.example.blogplatform.domain.PostStatus;
 import com.example.blogplatform.domain.dtos.CategoryDto;
+import com.example.blogplatform.domain.dtos.CreateCategoryRequest;
 import com.example.blogplatform.domain.entities.Category;
 import com.example.blogplatform.domain.entities.Post;
 import org.mapstruct.Mapper;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CategoryMapper {
+
+    Category toEntity(CreateCategoryRequest createCategoryRequest);
 
     @Mapping(target = "postCount", source = "posts", qualifiedByName = "calculatePostCount")
     CategoryDto toDto(Category category);
