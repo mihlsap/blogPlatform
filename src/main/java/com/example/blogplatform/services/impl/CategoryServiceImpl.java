@@ -2,6 +2,7 @@ package com.example.blogplatform.services.impl;
 
 import com.example.blogplatform.domain.dtos.CategoryDto;
 import com.example.blogplatform.domain.dtos.CreateCategoryRequest;
+import com.example.blogplatform.domain.entities.Category;
 import com.example.blogplatform.mappers.CategoryMapper;
 import com.example.blogplatform.repositories.CategoryRepository;
 import com.example.blogplatform.services.CategoryService;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -39,8 +41,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public CategoryDto deleteCategory(UUID id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new IllegalArgumentException("Category not found with id: " + id);
+        Optional<Category> category = categoryRepository.findById(id);
+        if (category.isEmpty()) {
+            throw new IllegalArgumentException("Category with id: " + id + " not found");
+        }
+        if (!category.get().getPosts().isEmpty()) {
+            throw new IllegalStateException("Category " + category.get().getName() + " has posts associated with it");
         }
         categoryRepository.deleteById(id);
         return null;

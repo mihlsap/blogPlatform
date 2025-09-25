@@ -15,18 +15,20 @@ import java.util.stream.Collectors;
 
 /**
  * Global exception handler for REST APIs in the blog platform.
- * <p>
- * This class uses Spring's {@link ControllerAdvice} to intercept and handle exceptions thrown by
+ *
+ * <p>This class uses Spring's {@link ControllerAdvice} to intercept and handle exceptions thrown by
  * REST controllers, ensuring consistent and structured error responses across the application.
- * <p>
- * It handles:
+ *
+ * <p>It handles:
  * <ul>
  *     <li>Validation errors from method arguments annotated with {@code @Valid}</li>
  *     <li>Constraint violations from {@code @RequestParam}, {@code @PathVariable}, etc.</li>
  *     <li>Malformed JSON input (deserialization issues)</li>
- *     <li>Unhandled generic exceptions</li>
+ *     <li>Violations of business rules or data integrity (e.g. duplicate entries, missing resources)</li>
+ *     <li>Generic unhandled exceptions</li>
  * </ul>
- * All responses are wrapped using {@link GenericResponse} to maintain a standard format.
+ *
+ * <p>All responses are wrapped using {@link GenericResponse} to maintain a standardized format.
  */
 @RestController
 @ControllerAdvice
@@ -34,7 +36,8 @@ import java.util.stream.Collectors;
 public class ErrorController {
 
     /**
-     * Handles validation errors when a request body fails {@code @Valid} checks.
+     * Handles validation errors when a request body fails {@code @Valid} checks,
+     * such as missing fields or invalid field formats in DTOs.
      *
      * @param e the exception containing details about failed validation constraints
      * @return a {@link ResponseEntity} with validation messages and HTTP 400 status
@@ -53,7 +56,8 @@ public class ErrorController {
     }
 
     /**
-     * Handles validation errors from path variables or query parameters annotated with {@code @Valid}.
+     * Handles validation errors for path variables, query parameters, or form data
+     * annotated with {@code @Valid} or {@code @Validated}.
      *
      * @param e the exception containing details about constraint violations
      * @return a {@link ResponseEntity} with detailed messages and HTTP 400 status
@@ -68,7 +72,8 @@ public class ErrorController {
     }
 
     /**
-     * Handles errors caused by malformed or unreadable JSON input.
+     * Handles errors caused by malformed or unreadable JSON input,
+     * such as syntax errors or incompatible field types during deserialization.
      *
      * @param e the exception thrown during deserialization of the request
      * @return a {@link ResponseEntity} with an error message and HTTP 400 status
@@ -80,7 +85,34 @@ public class ErrorController {
     }
 
     /**
-     * Handles any other uncaught exceptions.
+     * Handles {@link IllegalStateException}, typically thrown when a user request
+     * violates business logic or system constraints (e.g., trying to perform an operation
+     * that is not currently allowed).
+     *
+     * @param e the exception thrown during processing of the user request
+     * @return a {@link ResponseEntity} with an error message and HTTP 409 status
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<GenericResponse<Void>> handleIllegalStateException(IllegalStateException e) {
+        log.error("Caught IllegalStateException: {}", e.getMessage(), e);
+        return GenericResponse.error(e.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Handles {@link IllegalArgumentException}, typically thrown when input parameters
+     * are invalid, or when a requested resource does not exist or already exists.
+     *
+     * @param e the exception thrown during processing of the user request
+     * @return a {@link ResponseEntity} with an error message and HTTP 400 status
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<GenericResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
+        log.error("Caught IllegalArgumentException: {}", e.getMessage(), e);
+        return GenericResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handles any other unhandled exceptions to prevent exposing internal details.
      *
      * @param e the exception that was thrown
      * @return a {@link ResponseEntity} with a generic error message and HTTP 500 status
