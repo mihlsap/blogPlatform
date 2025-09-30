@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,11 +25,13 @@ import java.util.stream.Collectors;
  *     <li>Validation errors from method arguments annotated with {@code @Valid}</li>
  *     <li>Constraint violations from {@code @RequestParam}, {@code @PathVariable}, etc.</li>
  *     <li>Malformed JSON input (deserialization issues)</li>
- *     <li>Violations of business rules or data integrity (e.g. duplicate entries, missing resources)</li>
+ *     <li>Business logic or data integrity violations (e.g., illegal state, bad arguments)</li>
+ *     <li>Authentication failures such as invalid login credentials</li>
  *     <li>Generic unhandled exceptions</li>
  * </ul>
  *
- * <p>All responses are wrapped using {@link GenericResponse} to maintain a standardized format.
+ * <p>All responses are wrapped using {@link GenericResponse} to maintain a standardized format
+ * for API error handling.
  */
 @RestController
 @ControllerAdvice
@@ -81,7 +84,7 @@ public class ErrorController {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<GenericResponse<Void>> handleMalformedJson(HttpMessageNotReadableException e) {
         log.error("Malformed JSON request: {}", e.getMessage(), e);
-        return GenericResponse.error("Malformed JSON request", HttpStatus.BAD_REQUEST);
+        return GenericResponse.error("Malformed JSON request: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -95,7 +98,7 @@ public class ErrorController {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<GenericResponse<Void>> handleIllegalStateException(IllegalStateException e) {
         log.error("Caught IllegalStateException: {}", e.getMessage(), e);
-        return GenericResponse.error(e.getMessage(), HttpStatus.CONFLICT);
+        return GenericResponse.error("Illegal state exception: " + e.getMessage(), HttpStatus.CONFLICT);
     }
 
     /**
@@ -108,7 +111,7 @@ public class ErrorController {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<GenericResponse<Void>> handleIllegalArgumentException(IllegalArgumentException e) {
         log.error("Caught IllegalArgumentException: {}", e.getMessage(), e);
-        return GenericResponse.error(e.getMessage(), HttpStatus.BAD_REQUEST);
+        return GenericResponse.error("Illegal argument exception: " + e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -121,5 +124,18 @@ public class ErrorController {
     public ResponseEntity<GenericResponse<Void>> handleException(Exception e) {
         log.error("Caught Exception: {}", e.getMessage(), e);
         return GenericResponse.error("Unknown Error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Handles authentication failures due to invalid username or password,
+     * typically thrown during login attempts with incorrect credentials.
+     *
+     * @param e the {@link BadCredentialsException} indicating invalid authentication input
+     * @return a {@link ResponseEntity} with an error message and HTTP 401 status
+     */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<GenericResponse<Void>> handleBadCredentialsException(BadCredentialsException e) {
+        log.error("Caught BadCredentialsException: {}", e.getMessage(), e);
+        return GenericResponse.error("Incorrect username or password.", HttpStatus.UNAUTHORIZED);
     }
 }
