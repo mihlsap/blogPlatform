@@ -2,7 +2,6 @@ package com.example.blogplatform.services;
 
 import com.example.blogplatform.domain.dtos.CategoryDto;
 import com.example.blogplatform.domain.dtos.CreateCategoryRequest;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,8 +41,4 @@ public interface CategoryService {
      * @throws IllegalStateException    if the category has associated posts
      */
     CategoryDto deleteCategory(UUID id);
-
-    @ApiStatus.ScheduledForRemoval(inVersion = "1.1")
-    @Deprecated(since = "1.1")
-    CategoryDto getCategoryById(UUID id);
 }

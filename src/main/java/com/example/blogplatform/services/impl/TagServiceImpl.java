@@ -7,7 +7,6 @@ import com.example.blogplatform.mappers.TagMapper;
 import com.example.blogplatform.repositories.TagRepository;
 import com.example.blogplatform.services.TagService;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.ApiStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,12 +47,5 @@ public class TagServiceImpl implements TagService {
         }
         tagRepository.deleteById(id);
         return null;
-    }
-
-    @ApiStatus.ScheduledForRemoval(inVersion = "1.1")
-    @Deprecated(since = "1.1")
-    @Override
-    public TagDto getTagById(UUID id) {
-        return tagMapper.toDto(tagRepository.findById(id).orElse(null));
     }
 }

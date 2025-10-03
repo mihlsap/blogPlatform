@@ -33,7 +33,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<PostDto> getUserDrafts(UUID userId) {
-        return postRepository.findAll(PostSpecification.hasAuthor(userId))
+        return postRepository.findAll(
+                PostSpecification.hasAuthor(userId)
+                        .and(PostSpecification.hasStatus(PostStatus.DRAFT)))
                 .stream()
                 .map(postMapper::toDto)
                 .toList();
