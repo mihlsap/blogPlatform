@@ -22,6 +22,8 @@ public enum ResponseMessage {
     TAG_REMOVED(HttpStatus.NO_CONTENT, "Tag removed."),
 
     POST_ADDED(HttpStatus.CREATED, "Post added."),
+    POST_FOUND(HttpStatus.OK, "Post found."),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "Post not found."),
     POSTS_FOUND(HttpStatus.OK, "Posts found."),
     NO_POSTS_FOUND(HttpStatus.NOT_FOUND, "No posts found."),
     POST_REMOVED(HttpStatus.NO_CONTENT, "Post removed.");

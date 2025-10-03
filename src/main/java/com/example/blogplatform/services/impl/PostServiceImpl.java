@@ -11,6 +11,7 @@ import com.example.blogplatform.repositories.TagRepository;
 import com.example.blogplatform.repositories.UserRepository;
 import com.example.blogplatform.services.PostService;
 import com.example.blogplatform.specification.PostSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,12 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
+
+    @Override
+    public PostDto getPost(UUID postId) {
+        return postMapper.toDto(postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalStateException("Post with id " + postId + " not found")));
+    }
 
     @Override
     public List<PostDto> getAllPostsWithCriteria(UUID categoryId, UUID userId, UUID tagId) {
@@ -55,6 +62,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostDto addPost(CreatePostRequest createPostRequest, UUID userId) {
         LocalDateTime now = LocalDateTime.now();
         Post post = new Post();
@@ -77,8 +85,19 @@ public class PostServiceImpl implements PostService {
         return postMapper.toDto(postRepository.save(post));
     }
 
+    @Override
+    @Transactional
+    public PostDto removePost(UUID postId, UUID userId) {
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new IllegalArgumentException("Post with id: " + postId + " not found!"));
 
-
+        if (! post.getAuthor().getId().equals(userId)) {
+            throw new IllegalArgumentException("User with id: " + userId
+                    + " is not author of this post! (post's id: " + postId + ")");
+        }
+        postRepository.delete(post);
+        return postMapper.toDto(post);
+    }
 
     private Integer calculateReadingTime(String content) {
         if (content == null || content.isEmpty()) {

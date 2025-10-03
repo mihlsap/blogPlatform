@@ -12,4 +12,8 @@ public interface PostService {
     List<PostDto> getUserDrafts(UUID userId);
 
     PostDto addPost(CreatePostRequest createPostRequest, UUID userId);
+
+    PostDto removePost(UUID postId, UUID userId);
+
+    PostDto getPost(UUID postId);
 }

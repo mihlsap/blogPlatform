@@ -19,6 +19,15 @@ public class PostController {
 
     private final PostService postService;
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<GenericResponse<PostDto>> getPost(@PathVariable UUID postId) {
+        return GenericResponse.success(
+                ResponseMessage.POST_FOUND.message,
+                ResponseMessage.POST_FOUND.status,
+                postService.getPost(postId)
+        );
+    }
+
     @GetMapping
     public ResponseEntity<GenericResponse<List<PostDto>>> getAllPublishedPostsWithCriteria(
             @RequestParam(required = false) UUID categoryId,
@@ -71,4 +80,15 @@ public class PostController {
         );
     }
 
+    @DeleteMapping(path = "/{postId}")
+    public ResponseEntity<GenericResponse<PostDto>> deletePost(
+            @PathVariable UUID postId,
+            @RequestAttribute UUID userId
+            ) {
+        return GenericResponse.success(
+                ResponseMessage.POST_REMOVED.message,
+                ResponseMessage.POST_REMOVED.status,
+                postService.removePost(postId, userId)
+        );
+    }
 }
