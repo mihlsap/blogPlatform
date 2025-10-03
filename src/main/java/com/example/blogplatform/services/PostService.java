@@ -1,5 +1,6 @@
 package com.example.blogplatform.services;
 
+import com.example.blogplatform.domain.dtos.CreatePostRequest;
 import com.example.blogplatform.domain.dtos.PostDto;
 
 import java.util.List;
@@ -9,4 +10,6 @@ public interface PostService {
     List<PostDto> getAllPostsWithCriteria(UUID categoryId, UUID userId, UUID tagId);
 
     List<PostDto> getUserDrafts(UUID userId);
+
+    PostDto addPost(CreatePostRequest createPostRequest, UUID userId);
 }

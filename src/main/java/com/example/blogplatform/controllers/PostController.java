@@ -1,5 +1,6 @@
 package com.example.blogplatform.controllers;
 
+import com.example.blogplatform.domain.dtos.CreatePostRequest;
 import com.example.blogplatform.domain.dtos.PostDto;
 import com.example.blogplatform.services.PostService;
 import com.example.blogplatform.utils.GenericResponse;
@@ -57,4 +58,17 @@ public class PostController {
                 posts
         );
     }
+
+    @PostMapping
+    public ResponseEntity<GenericResponse<PostDto>> createPost(
+            @RequestBody CreatePostRequest createPostRequest,
+            @RequestAttribute(name = "userId") UUID userId
+    ) {
+        return GenericResponse.success(
+                ResponseMessage.POST_ADDED.message,
+                ResponseMessage.POST_ADDED.status,
+                postService.addPost(createPostRequest, userId)
+        );
+    }
+
 }
