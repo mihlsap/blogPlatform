@@ -6,8 +6,10 @@ import com.example.blogplatform.domain.entities.Category;
 import com.example.blogplatform.mappers.CategoryMapper;
 import com.example.blogplatform.repositories.CategoryRepository;
 import com.example.blogplatform.services.CategoryService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.ApiStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,5 +52,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
         categoryRepository.deleteById(id);
         return null;
+    }
+
+    @ApiStatus.ScheduledForRemoval(inVersion = "1.1")
+    @Deprecated(since = "1.1")
+    @Override
+    public CategoryDto getCategoryById(UUID id) {
+        return categoryMapper.toDto(categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Category with id: " + id + " not found")));
     }
 }

@@ -1,13 +1,13 @@
 package com.example.blogplatform.services.impl;
 
 import com.example.blogplatform.domain.dtos.CreateTagRequest;
-import com.example.blogplatform.domain.dtos.TagResponse;
-import com.example.blogplatform.domain.entities.Category;
+import com.example.blogplatform.domain.dtos.TagDto;
 import com.example.blogplatform.domain.entities.Tag;
 import com.example.blogplatform.mappers.TagMapper;
 import com.example.blogplatform.repositories.TagRepository;
 import com.example.blogplatform.services.TagService;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.ApiStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,23 +22,23 @@ public class TagServiceImpl implements TagService {
     private final TagMapper tagMapper;
 
     @Override
-    public List<TagResponse> getAllTags() {
+    public List<TagDto> getAllTags() {
         return tagRepository.findAllWithPostCount()
                 .stream()
-                .map(tagMapper::toTagResponse)
+                .map(tagMapper::toDto)
                 .toList();
     }
 
     @Override
-    public TagResponse createTag(CreateTagRequest createTagRequest) {
+    public TagDto createTag(CreateTagRequest createTagRequest) {
         if (tagRepository.existsByNameIgnoreCase(createTagRequest.getName())) {
             throw new IllegalArgumentException("Tag already exists with name: " + createTagRequest.getName());
         }
-        return tagMapper.toTagResponse(tagRepository.save(tagMapper.toEntity(createTagRequest)));
+        return tagMapper.toDto(tagRepository.save(tagMapper.toEntity(createTagRequest)));
     }
 
     @Override
-    public TagResponse deleteTag(UUID id) {
+    public TagDto deleteTag(UUID id) {
         Optional<Tag> tag = tagRepository.findById(id);
         if (tag.isEmpty()) {
             throw new IllegalArgumentException("Tag with id: " + id + " not found");
@@ -48,5 +48,12 @@ public class TagServiceImpl implements TagService {
         }
         tagRepository.deleteById(id);
         return null;
+    }
+
+    @ApiStatus.ScheduledForRemoval(inVersion = "1.1")
+    @Deprecated(since = "1.1")
+    @Override
+    public TagDto getTagById(UUID id) {
+        return tagMapper.toDto(tagRepository.findById(id).orElse(null));
     }
 }

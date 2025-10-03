@@ -11,15 +11,20 @@ import org.springframework.http.HttpStatus;
  */
 public enum ResponseMessage {
 
-    INVALID_INPUT(HttpStatus.BAD_REQUEST, "Invalid input."),
     CATEGORY_ADDED(HttpStatus.CREATED, "Category added."),
-    CATEGORY_REMOVED(HttpStatus.NO_CONTENT, "Category removed."),
     CATEGORIES_FOUND(HttpStatus.OK, "Categories found."),
     NO_CATEGORIES_FOUND(HttpStatus.NOT_FOUND, "No categories found."),
+    CATEGORY_REMOVED(HttpStatus.NO_CONTENT, "Category removed."),
 
+    TAG_ADDED(HttpStatus.CREATED, "Tag added."),
     TAGS_FOUND(HttpStatus.OK, "Tags found."),
     NO_TAGS_FOUND(HttpStatus.NOT_FOUND, "No tags found."),
-    TAG_REMOVED(HttpStatus.NO_CONTENT, "Tag removed.");
+    TAG_REMOVED(HttpStatus.NO_CONTENT, "Tag removed."),
+
+    POST_ADDED(HttpStatus.CREATED, "Post added."),
+    POSTS_FOUND(HttpStatus.OK, "Posts found."),
+    NO_POSTS_FOUND(HttpStatus.NOT_FOUND, "No posts found."),
+    POST_REMOVED(HttpStatus.NO_CONTENT, "Post removed.");
 
     public final String message;
     public final HttpStatus status;

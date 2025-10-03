@@ -2,7 +2,7 @@ package com.example.blogplatform.mappers;
 
 import com.example.blogplatform.domain.PostStatus;
 import com.example.blogplatform.domain.dtos.CreateTagRequest;
-import com.example.blogplatform.domain.dtos.TagResponse;
+import com.example.blogplatform.domain.dtos.TagDto;
 import com.example.blogplatform.domain.entities.Post;
 import com.example.blogplatform.domain.entities.Tag;
 import org.mapstruct.Mapper;
@@ -18,7 +18,7 @@ public interface TagMapper {
     Tag toEntity(CreateTagRequest createRequest);
 
     @Mapping(target = "postCount", source = "posts", qualifiedByName = "calculatePostCount")
-    TagResponse toTagResponse(Tag tag);
+    TagDto toDto(Tag tag);
 
     @Named("calculatePostCount")
     default Integer calculatePostCount(Set<Post> posts) {

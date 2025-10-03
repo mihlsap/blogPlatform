@@ -1,6 +1,7 @@
 package com.example.blogplatform.controllers;
 
 import com.example.blogplatform.utils.GenericResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -137,5 +138,11 @@ public class ErrorController {
     public ResponseEntity<GenericResponse<Void>> handleBadCredentialsException(BadCredentialsException e) {
         log.error("Caught BadCredentialsException: {}", e.getMessage(), e);
         return GenericResponse.error("Incorrect username or password.", HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<GenericResponse<Void>> handleEntityNotFoundException(EntityNotFoundException e) {
+        log.error("Caught EntityNotFoundException: {}", e.getMessage(), e);
+        return GenericResponse.error(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
