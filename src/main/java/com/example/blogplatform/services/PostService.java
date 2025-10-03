@@ -16,4 +16,6 @@ public interface PostService {
     PostDto removePost(UUID postId, UUID userId);
 
     PostDto getPost(UUID postId);
+
+    PostDto updatePost(UUID postId, CreatePostRequest createPostRequest, UUID userId);
 }

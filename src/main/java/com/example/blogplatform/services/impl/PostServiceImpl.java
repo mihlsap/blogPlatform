@@ -4,6 +4,7 @@ import com.example.blogplatform.domain.PostStatus;
 import com.example.blogplatform.domain.dtos.CreatePostRequest;
 import com.example.blogplatform.domain.dtos.PostDto;
 import com.example.blogplatform.domain.entities.Post;
+import com.example.blogplatform.domain.entities.User;
 import com.example.blogplatform.mappers.PostMapper;
 import com.example.blogplatform.repositories.CategoryRepository;
 import com.example.blogplatform.repositories.PostRepository;
@@ -54,8 +55,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getUserDrafts(UUID userId) {
         return postRepository.findAll(
-                PostSpecification.hasAuthor(userId)
-                        .and(PostSpecification.hasStatus(PostStatus.DRAFT)))
+                        PostSpecification.hasAuthor(userId)
+                                .and(PostSpecification.hasStatus(PostStatus.DRAFT)))
                 .stream()
                 .map(postMapper::toDto)
                 .toList();
@@ -64,25 +65,36 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PostDto addPost(CreatePostRequest createPostRequest, UUID userId) {
-        LocalDateTime now = LocalDateTime.now();
-        Post post = new Post();
-        post.setTitle(createPostRequest.getTitle());
-        post.setContent(createPostRequest.getContent());
-        post.setStatus(createPostRequest.getStatus());
+        Post post = createOrUpdatePost(createPostRequest);
+
         post.setAuthor(userRepository.findById(userId).orElseThrow(() ->
                 new IllegalArgumentException("User with id: " + userId + " not found!")));
-        post.setCreatedAt(now);
-        post.setUpdatedAt(now);
-        post.setReadingTime(calculateReadingTime(createPostRequest.getContent()));
-        post.setCategory(categoryRepository.findById(createPostRequest.getCategoryId()).orElseThrow(() ->
-                new IllegalArgumentException("Category with id: " + createPostRequest.getCategoryId() + " not found"))
-        );
-        post.setTags(createPostRequest.getTagIds()
-                .stream()
-                .map(tagId -> tagRepository.findById(tagId)
-                        .orElseThrow()).collect(Collectors.toSet())
-        );
+
+        post.setCreatedAt(LocalDateTime.now());
+
         return postMapper.toDto(postRepository.save(post));
+    }
+
+    @Override
+    @Transactional
+    public PostDto updatePost(UUID postId, CreatePostRequest createPostRequest, UUID userId) {
+        Post existingPost = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalStateException("Post with id " + postId + " not found"));
+
+        User author = existingPost.getAuthor();
+        LocalDateTime createdAt = existingPost.getCreatedAt();
+
+        if (!author.getId().equals(userId)) {
+            throw new IllegalArgumentException("User with id: " + userId
+                    + " is not author of this post! (postId: " + postId + ")");
+        }
+
+        existingPost = createOrUpdatePost(createPostRequest);
+        existingPost.setAuthor(author);
+        existingPost.setId(postId);
+        existingPost.setCreatedAt(createdAt);
+
+        return postMapper.toDto(postRepository.save(existingPost));
     }
 
     @Override
@@ -91,7 +103,7 @@ public class PostServiceImpl implements PostService {
         Post post = postRepository.findById(postId).orElseThrow(() ->
                 new IllegalArgumentException("Post with id: " + postId + " not found!"));
 
-        if (! post.getAuthor().getId().equals(userId)) {
+        if (!post.getAuthor().getId().equals(userId)) {
             throw new IllegalArgumentException("User with id: " + userId
                     + " is not author of this post! (post's id: " + postId + ")");
         }
@@ -106,5 +118,25 @@ public class PostServiceImpl implements PostService {
 
         int wordCount = content.trim().split("\\s+").length;
         return (int) Math.ceil((double) wordCount / WORDS_PER_MINUTE);
+    }
+
+    @Transactional
+    protected Post createOrUpdatePost(CreatePostRequest createPostRequest) {
+        LocalDateTime now = LocalDateTime.now();
+        Post post = new Post();
+        post.setTitle(createPostRequest.getTitle());
+        post.setContent(createPostRequest.getContent());
+        post.setStatus(createPostRequest.getStatus());
+        post.setUpdatedAt(now);
+        post.setReadingTime(calculateReadingTime(createPostRequest.getContent()));
+        post.setCategory(categoryRepository.findById(createPostRequest.getCategoryId()).orElseThrow(() ->
+                new IllegalArgumentException("Category with id: " + createPostRequest.getCategoryId() + " not found"))
+        );
+        post.setTags(createPostRequest.getTagIds()
+                .stream()
+                .map(tagId -> tagRepository.findById(tagId)
+                        .orElseThrow()).collect(Collectors.toSet())
+        );
+        return post;
     }
 }

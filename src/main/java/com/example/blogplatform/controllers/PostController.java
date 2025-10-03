@@ -19,7 +19,7 @@ public class PostController {
 
     private final PostService postService;
 
-    @GetMapping("/{postId}")
+    @GetMapping(path = "/{postId}")
     public ResponseEntity<GenericResponse<PostDto>> getPost(@PathVariable UUID postId) {
         return GenericResponse.success(
                 ResponseMessage.POST_FOUND.message,
@@ -77,6 +77,19 @@ public class PostController {
                 ResponseMessage.POST_ADDED.message,
                 ResponseMessage.POST_ADDED.status,
                 postService.addPost(createPostRequest, userId)
+        );
+    }
+
+    @PutMapping(path = "/{postId}")
+    public ResponseEntity<GenericResponse<PostDto>> updatePost(
+            @PathVariable UUID postId,
+            @RequestBody CreatePostRequest createPostRequest,
+            @RequestAttribute(name = "userId") UUID userId
+    ) {
+        return GenericResponse.success(
+                ResponseMessage.POST_UPDATED.message,
+                ResponseMessage.POST_UPDATED.status,
+                postService.updatePost(postId, createPostRequest, userId)
         );
     }
 
